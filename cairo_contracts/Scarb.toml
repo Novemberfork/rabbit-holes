@@ -3,8 +3,8 @@ name = "rabbitholes"
 version = "0.1.0"
 authors = ["Matt Carter"]
 readme = "README.md"
-homepage = "https://rbits.space/"
-repository = "https://github.com/0xDegenDeveloper/Rabbitholes"
+homepage = "https://rabbitholes.novemberfork.io/"
+repository = "https://github.com/Novemberfork/rabbit-holes"
 description = "---"
 
 [dependencies]

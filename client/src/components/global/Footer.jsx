@@ -62,7 +62,7 @@ export default function Footer(props) {
                 className="footers"
               ></FontAwesomeIcon>
             </Link>
-            <Link to="https://github.com/0xDegenDeveloper" target="_blank">
+            <Link to="https://github.com/Novemberfork" target="_blank">
               <FontAwesomeIcon icon={faGithub}></FontAwesomeIcon>
             </Link>
             <Link to="https://novemberfork.io" target="_blank">

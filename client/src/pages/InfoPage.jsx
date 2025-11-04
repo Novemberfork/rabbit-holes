@@ -58,7 +58,7 @@ export default function InfoPage(props) {
             </a>{" "}
             <a
               target="_blank"
-              href="https://www.github.com/0xDegenDeveloper/RabbitHoles"
+              href="https://www.github.com/Novemberfork/rabbit-holes"
             >
               <FontAwesomeIcon
                 icon={faGithub}
