@@ -1,4 +1,4 @@
-# RabbitHoles
+# rabbit-holes
 
 ## Overview
 
@@ -15,8 +15,3 @@ RabbitHoles is a discussion platform built on Starknet, offering a space for per
 in the 'SHOWER THOUGHTS' Hole, costing him some of his $RBITS
 
 ##### [/cairo_contracts](./cairo_contracts/) for technical details
-
-## Current development status
-
-- Finalizing [/client](./client)
-- Connecting contracts -> client
