@@ -164,26 +164,27 @@ export default function UserPage(props) {
                   : index + 1
               );
             }}
-            className={`bottom right ${
-              (index - 1) * 10 + 10 >=
+            className={`bottom right ${(index - 1) * 10 + 10 >=
               (opt == "holes"
                 ? userArchive.totalHoles
                 : userArchive.totalRabbits)
-                ? "fill"
-                : ``
-            }`}
+              ? "fill"
+              : ``
+              }`}
             style={opt == "depth" ? { color: "rgba(0,0,0,0)" } : {}}
           />
         </div>
         <div className="stats sels3">
-          <FontAwesomeIcon
-            icon={faUser}
-            className={`${props.opt == "depth" ? "active" : ""} bottom left`}
-            onClick={() => {
-              setOpt("depth");
-              setIndex(1);
-            }}
-          />
+          {
+            //          <FontAwesomeIcon
+            //            icon={faUser}
+            //            className={`${props.opt == "depth" ? "active" : ""} bottom left`}
+            //            onClick={() => {
+            //              setOpt("depth");
+            //              setIndex(1);
+            //            }}
+            //          />
+          }
           <FontAwesomeIcon
             icon={faDigging}
             className={`${props.opt == "holes" ? "active" : ""}`}
