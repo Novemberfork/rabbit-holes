@@ -6,7 +6,7 @@ import { useState, useMemo, useEffect } from "react";
 export default function LoginButton(props) {
   const [isModalOpen, setIsModalOpen] = useState(false);
 
-  // const { address } = useAccount();
+  const { address } = useAccount();
 
   useEffect(() => {}, [address]);
 
