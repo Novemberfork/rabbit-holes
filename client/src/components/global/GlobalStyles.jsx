@@ -1,5 +1,36 @@
 import styled, { createGlobalStyle } from "styled-components";
 
+let bgs = {
+  flat: "bg-flat.png",
+  flatInverse: "bg-flat-inv.png",
+  shiftt: "bg-shift.png",
+  shifttInverse: "bg-shift-inv.png",
+  shift2: "bg-shift-2.png",
+  shift3: "bg-shift-3.png",
+};
+
+const whichBg = (mobile, path) => {
+  console.log(mobile, path);
+  if (mobile) {
+    return bgs.flatInverse;
+  } else {
+    if (path == "/") return bgs.shift2;
+    if (path == "/stats") return bgs.shift2;
+
+    if (path.startsWith("/archive")) {
+      return bgs.shift3;
+    }
+    if (path.startsWith("/user")) {
+      return bgs.flatInverse;
+    }
+    if (path.startsWith("/info")) {
+      return bgs.flat;
+    } else {
+      return bgs.flat;
+    }
+  }
+};
+
 const GlobalStyle = createGlobalStyle`
     :root {
         --limeGreen: #FF7600;
@@ -7,7 +38,10 @@ const GlobalStyle = createGlobalStyle`
         --greyGreen: #b2e2ae;
         --forrestGreen: #04241E;
         --nav-link-el-padding-box: 0 clamp(10px, 2vw 100px);
-        background-image: url("/bg.png");
+        ${
+          "" /* background-image: url(${(props) => whichBg(props.mobile, props.path)});  */
+        }
+        background-image: url("/bg-flat-inv.png"); 
         font-synthesis: none;
         text-rendering: optimizeLegibility;
         -webkit-font-smoothing: antialiased;
@@ -34,7 +68,7 @@ const GlobalStyle = createGlobalStyle`
         overflow-y: scroll;
         font-family: "Andale Mono", monospace;
         border:none;
-        overflow: hidden;
+        ${"" /* overflow: hidden; */}
     }
 
     em {
@@ -51,8 +85,56 @@ const GlobalStyle = createGlobalStyle`
         align-items: center;
         justify-content: center;
         max-height: 100vh;   
+        ${"" /* height: -webkit-fill-available; */}
+
         z-index: 999;   
         border:none;
+    }
+
+    .spinnerY {
+        :hover {
+            img{
+                animation: rotate360Y 3s infinite ease-in-out;
+            }
+        }
+    }
+
+    .spinner {
+        :hover {
+            ${"" /* cursor: pointer; */}
+            img{
+                animation: rotate360 3s infinite ease-in-out;
+            }
+        }
+    }
+
+     @keyframes rotate360 {
+      0% {
+        transform: rotate(0deg);
+      }
+      50%,
+      52% {
+        transform: rotate(720deg);
+      }
+
+      75%,
+      100% {
+        transform: rotate(0deg);
+      }
+    }
+    @keyframes rotate360Y {
+      0% {
+        transform: rotateY(0deg);
+      }
+      50%,
+      52% {
+        transform: rotateY(720deg);
+      }
+
+      75%,
+      100% {
+        transform: rotateY(0deg);
+      }
     }
 
     ${
@@ -79,16 +161,16 @@ const GlobalStyle = createGlobalStyle`
         text-align: left;
         background-color: var(--forrestGreen);
         color: var(--lightGreen);
-        border: 3px solid var(--forrestGreen);
+        ${"" /* border: 3px solid var(--forrestGreen); */}
         font-family: "Andale Mono", monospace;
         font-size: clamp(12px, 3vw, 15px);
         background-color: rgba(255, 255, 255, 0.01);
-        backdrop-filter: blur(2px);
-        -webkit-backdrop-filter: blur(2px);
-        -moz-backdrop-filter: blur(2px);
-        -o-backdrop-filter: blur(2px);
-        -ms-backdrop-filter: blur(2px);
-        box-shadow: 0px 0px 25px 0px rgba(0, 0, 0, 0.2);
+        backdrop-filter: blur(10px);
+        -webkit-backdrop-filter: blur(10px);
+        -moz-backdrop-filter: blur(10px);
+        -o-backdrop-filter: blur(10px);
+        -ms-backdrop-filter: blur(10px);
+        box-shadow: 0px 0px 5px 0px rgba(0, 0, 0, 0.2);
     }
 
     .outlined-boxx{
@@ -110,27 +192,37 @@ const GlobalStyle = createGlobalStyle`
         display: flex;
         gap: 1rem;
         font-size: clamp(25px, 4vw, 50px);
+        ${"" /* backdrop-filter: blur(10px); */}
+        background-color: var(--forrestGreen);
         align-items: center;
         border-radius: 2rem;
-        border: 3px solid var(--forrestGreen);
-        background-color: var(--forrestGreen);
-        color: var(--lightGreen);
+        ${"" /* border: 3px solid var(--forrestGreen); */}
+        ${"" /* background-color: var(--forrestGreen); */}
+        color: var(--limeGreen);
         box-shadow: 0px 0px 5px 0px var(--forrestGreen);
+
+         :hover{
+            scale:1.01;
+        }
+
+
     }
 
     .dark-search-bar-input {
         border-radius: 2rem;
-        padding: 0.5rem;
+        padding: 1rem;
         border: none;
         background-color: rgba(0, 0, 0, 0);
         color: var(--lightGreen);
         text-transform: uppercase;
-        width: clamp(100px, 45vw, 500px);
+        width: clamp(100px, 40vw, 500px);
         font-family: "Andale Mono", monospace;
-        font-size: clamp(6px, 2vw, 10px);
+        font-size: clamp(6px, 3vw, 14px);
+
+       
 
         ::placeholder {
-            color: var(--limeGreen);
+            color: var(--greyGreen);
         }
 
         :focus {
@@ -142,6 +234,12 @@ const GlobalStyle = createGlobalStyle`
         font-size: clamp(15px, 4vw, 20px);
         padding: 0.5rem;
         padding-right: 1rem;
+
+        :hover {
+            svg{
+                scale:1.05;
+            }
+        }
 
         &.one {
             color: var(--forrestGreen);
@@ -169,12 +267,29 @@ const GlobalStyle = createGlobalStyle`
         background-color: var(--forrestGreen);
         color: var(--lightGreen);
         font-family: "Andale Mono", monospace;
-        font-size: clamp(12px, 3vw, 15px);
-        overflow:scroll;
         box-shadow: 0px 0px 5px 0px var(--forrestGreen);
         margin: 0 auto;
+        ${"" /* font-size: clamp(7px, 2.5vw, 18px); */}
 
-        min-width: clamp(75px, 55vw, 600px);
+        overflow:scroll;
+      
+        width: clamp(75px, 60vw, 600px);
+
+        min-height: 200px;
+
+        ${
+          "" /* p{
+          font-size: clamp(10px, 3vw, 14px);
+
+        
+        } */
+        }
+        h1{
+         font-size: clamp(18px, 4vw, 35px);
+        margin: .5rem;
+        }
+
+   
 
         ${
           "" /* h5{

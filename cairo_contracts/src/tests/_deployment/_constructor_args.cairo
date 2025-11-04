@@ -22,6 +22,8 @@ use starknet::{
 };
 use traits::{Into, TryInto};
 
+// use starknet::Keccak256;
+
 /// helper
 fn deploy_suite() -> (
     IManagerDispatcher,
@@ -161,6 +163,15 @@ fn deploy_suite() -> (
 #[available_gas(16000000)]
 fn constructor() {
     let (Manager, Rbits, Registry, V1, DigToken) = deploy_suite();
+
+    '?:></;--0230-a;lk'.print();
+    // '''.print();
+    ':'.print();
+    '>'.print();
+    '<'.print();
+    '/'.print();
+    ';'.print();
+    '('.print();
 
     'permits'.print();
     'MINT_PERMIT'.print();

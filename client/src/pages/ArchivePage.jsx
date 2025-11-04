@@ -1,406 +1,737 @@
-import { useMemo, useState } from "react";
-import { useParams } from "react-router-dom";
-import { useNavigate } from "react-router-dom";
-import fetchHoleData from "../components/hooks/fetchHoleData";
-import fetchRabbitData from "../components/hooks/fetchRabbitData";
-import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
-import {
-  faArrowsToCircle,
-  faCircleArrowLeft,
-  faCircleArrowRight,
-  faFireAlt,
-} from "@fortawesome/free-solid-svg-icons";
+import React, { useMemo } from "react";
+
+import { useState } from "react";
 import styled from "styled-components";
 
-export default function ArchivePage() {
-  const totalDigs = 1111;
-  let { key, key2 } = useParams();
-  const navigate = useNavigate();
+import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
+import {
+  faArrowCircleDown,
+  faArrowCircleLeft,
+  faArrowCircleRight,
+  faArrowCircleUp,
+  faChevronCircleDown,
+  faChevronCircleUp,
+  faFireFlameCurved,
+  faSearch,
+} from "@fortawesome/free-solid-svg-icons";
+import { useParams } from "react-router-dom";
+import { useEffect } from "react";
 
-  if (!key || parseInt(key) == 0) key = 1;
-  if (!key2 || parseInt(key2) == 0) key2 = 1;
-  if (key > totalDigs) {
-    key = totalDigs;
-    // navigate(`/archive/1111/1`);
-  }
-
-  const [holeId, setHoleId] = useState(key);
-  const [holeJump, setHoleJump] = useState(key);
-  const holeData = useMemo(() => {
-    return fetchHoleData(holeId);
-  }, [holeId]);
-
-  if (key2 > holeData.depth) key2 = holeData.depth;
-
-  const [rabbitJump, setRabbitJump] = useState(key2);
-  const [depthIndex, setDepthIndex] = useState(key2);
-
-  //   const [rabbitId, setRabbitId] = useState(key2);
-
-  const rabbitId = holeData.rabbitIds[depthIndex - 1];
-  const rabbitData = useMemo(() => {
-    return fetchRabbitData(rabbitId);
-  }, [rabbitId]);
-
-  function handleEnterPress() {
-    if (holeJump != holeId && holeJump > 0) {
-      holeJumpFunc();
-      return;
+export function Rabbit({
+  rabbit,
+  setModals,
+  setUseJump,
+  isGlobalRabbit,
+  hole,
+}) {
+  const onClickHandler = () => {
+    if (isGlobalRabbit) {
+      setUseJump(false);
+      setModals.setRabbitModal(true);
+      setModals.setRabbit(rabbit);
+    } else {
+      setUseJump(true);
+      setModals.setHole(hole);
+      setModals.setRabbit(rabbit);
+      setModals.setRabbitModal(true);
     }
-    if (rabbitJump != depthIndex && depthIndex > 0) {
-      rabbitJumpFunc();
-      return;
-    }
-  }
+  };
 
-  function holeJumpRight() {
-    const newIndex = parseInt(holeJump ? holeJump : holeId) + 1;
-    if (newIndex <= totalDigs) {
-      setHoleJump(newIndex);
-      document.getElementById("hole-jump").value = newIndex;
-    }
-  }
+  return (
+    <div className="rabbit spinnerY" onClick={onClickHandler}>
+      <p>{rabbit.msg}</p>
+      <div className="r-stats">
+        <p>{isGlobalRabbit ? rabbit.burner : hole.title}</p>
+        <div className="ww">
+          <p>{rabbit.depth}</p>
+          <div className="w">
+            <img src={`/logo-cropped-lime.png`} alt="logo" className={`logo`} />
+          </div>
+        </div>
+      </div>
+    </div>
+  );
+}
 
-  function rabbitJumpRight() {
-    const newIndex = parseInt(rabbitJump ? rabbitJump : depthIndex) + 1;
-    if (newIndex <= holeData.depth) {
-      setRabbitJump(newIndex);
-      document.getElementById("rabbit-jump").value = newIndex;
-    }
-  }
+export default function ArchivePage(props) {
+  const { key } = useParams();
+  const [id, setId] = useState(!key || parseInt(key) == 0 ? 1 : parseInt(key));
+  const [index, setIndex] = useState(1);
+  const [burnModal, setBurnModal] = useState(false);
 
-  function holeJumpLeft() {
-    const newIndex = parseInt(holeJump ? holeJump : holeId) - 1;
-    if (newIndex >= 1) {
-      setHoleJump(newIndex);
-      document.getElementById("hole-jump").value = newIndex;
-    }
-  }
+  const hole = props.holes.length > 0 ? props.holes[id - 1] : {};
 
-  function rabbitJumpLeft() {
-    const newIndex = parseInt(rabbitJump ? rabbitJump : depthIndex) - 1;
-    if (newIndex >= 1) {
-      setRabbitJump(newIndex);
-      document.getElementById("rabbit-jump").value = newIndex;
+  useEffect(() => {
+    if (hole) {
+      props.setModals.setHole(hole);
+      props.setModals.setRabbit(hole.rabbits[0]);
     }
-  }
+  }, [hole]);
 
-  function holeJumpFunc() {
-    if (holeJump != holeId && holeJump > 0) {
-      setHoleId(holeJump);
-      setDepthIndex(1);
-      setRabbitJump(1);
-      navigate(`/archive/${holeJump}/1`);
-    }
-  }
+  let start = ((index - 1) * 10 + 1).toString().padStart(3, "0");
+  let end = Math.min(parseInt(start) + 9, hole == 0 ? 0 : hole.digs)
+    .toString()
+    .padStart(3, "0");
 
-  function rabbitJumpFunc() {
-    if (
-      rabbitJump != depthIndex &&
-      depthIndex > 0 &&
-      rabbitJump <= holeData.depth
-    ) {
-      setDepthIndex(rabbitJump);
-      navigate(`/archive/${holeJump}/${rabbitJump}`);
-    }
-  }
-
-  function handleInput(e) {
-    const pattern = e.target.getAttribute("pattern");
-    const regex = new RegExp(`^${pattern}$`);
-    if (!regex.test(e.target.value) && e.target.value !== "") {
-      e.target.value = e.target.value.slice(0, -1);
-    }
-  }
+  const chunkSize = 10;
+  const thisChunkArray = hole.rabbits.slice(
+    (index - 1) * chunkSize,
+    index * chunkSize
+  );
 
   return (
     <>
-      <div className="container">
-        <Wrapper
-          // className="outlined-boxx"
-          className="dark-box-600w box"
-          tabIndex="0"
-          onKeyDown={(e) => {
-            if (e.key == "Enter") handleEnterPress();
+      <ArchivePageStyled
+        className="container"
+        props={props}
+        mobile={props.mobile}
+      >
+        <div
+          onClick={() => {
+            props.setModals.setHole(hole);
+            props.setUseJump(false);
+            props.setModals.setHoleModal(true);
           }}
+          className={`hole-head spinner`}
         >
-          <div className="holes">
-            <div className="hole">
-              <h4>
-                &gt; Hole #{holeId}: <em>"{holeData.title}"</em>
-              </h4>
-              <h4>
-                &gt; Digger: <em>{holeData.digger}</em>
-              </h4>
-              <h4>
-                &gt; Timestamp: <em>{holeData.timestamp}</em>
-              </h4>
-              <h4>
-                &gt; Depth: <em>{holeData.depth}</em>
-              </h4>
-            </div>
-            <div className="sels">
-              <input
-                className="hole-jump"
-                pattern="\d*"
-                onInput={handleInput}
-                value={holeJump}
-                type="number"
-                min={1}
-                inputMode="number"
-                max={totalDigs}
-                id="hole-jump"
-                style={inputStyle(parseInt(holeId) == parseInt(holeJump))}
-                onChange={(e) => {
-                  setHoleJump(e.target.value);
-                }}
-              ></input>
-              <div
-                className="sel outlined-box-free-flex"
-                onClick={() => {
-                  holeJumpLeft();
-                }}
-              >
-                <FontAwesomeIcon icon={faCircleArrowLeft} />
-              </div>
-              <div
-                className="sel outlined-box-free-flex"
-                onClick={() => {
-                  holeJumpRight();
-                }}
-              >
-                <FontAwesomeIcon icon={faCircleArrowRight} />
-              </div>
-              <div
-                className={`sel jump-sel outlined-box-free-flex ${
-                  parseInt(holeId) == parseInt(holeJump) || holeJump > totalDigs
-                    ? "inactive"
-                    : "active"
-                }`}
-                onClick={() => {
-                  holeJumpFunc();
-                }}
-              >
-                <FontAwesomeIcon icon={faArrowsToCircle} />
+          <div className="top">
+            <h1>{hole.title}</h1>
+            <div className="stats">
+              <p>{hole.digs}</p> <FontAwesomeIcon icon={faFireFlameCurved} />
+              <p>{hole.depth}</p>
+              <div className="w">
+                <img src={"/logo-cropped-dark.png"} alt="logo" />
               </div>
             </div>
           </div>
+        </div>
 
-          <HBar />
-          <div className="rabbits">
-            <div className="rabbit">
-              <h4>
-                &gt; Rabbit <em>#{rabbitId}</em>
-              </h4>
-              <h4>
-                &gt; Burner: <em>{rabbitData.burner}</em>
-              </h4>
-              <h4>
-                &gt; Timestamp: <em>{rabbitData.timestamp}</em>
-              </h4>
-              <h4>
-                &gt; Msg: <em>{rabbitData.msg}</em>
-              </h4>
+        <div className="dark-box rabbits">
+          {thisChunkArray.map((rabbit, id) => (
+            <div key={rabbit.msg + id} className="rw">
+              <Rabbit
+                rabbit={rabbit}
+                setModals={props.setModals}
+                setRabbit={props.setModals.setRabbit}
+                setUseJump={props.setUseJump}
+                isGlobalRabbit={true}
+              />
+              <div className="bar"></div>
             </div>
-            <div className="sels">
-              <input
-                className="rabbit-jump"
-                pattern="\d*"
-                onInput={handleInput}
-                value={rabbitJump}
-                type="number"
-                min={1}
-                max={holeData.depth}
-                inputMode="number"
-                id="rabbit-jump"
-                style={inputStyle(parseInt(depthIndex) == parseInt(rabbitJump))}
-                onChange={(e) => {
-                  setRabbitJump(e.target.value);
-                }}
-              ></input>
-              <div
-                className="sel outlined-box-free-flex"
-                onClick={() => {
-                  rabbitJumpLeft();
-                }}
-              >
-                <FontAwesomeIcon icon={faCircleArrowLeft} />
-              </div>
-              <div
-                className="sel outlined-box-free-flex"
-                onClick={() => {
-                  rabbitJumpRight();
-                }}
-              >
-                <FontAwesomeIcon icon={faCircleArrowRight} />
-              </div>
-              <div
-                className={`sel jump-sel outlined-box-free-flex ${
-                  parseInt(depthIndex) == parseInt(rabbitJump) ||
-                  rabbitJump > holeData.depth
-                    ? "inactive"
-                    : "active"
-                }`}
-                onClick={() => {
-                  rabbitJumpFunc();
-                }}
-              >
-                <FontAwesomeIcon icon={faArrowsToCircle} />
-              </div>
-              <div
-                className="sel outlined-box-free-flex"
-                id="burn"
-                onClick={() => {
-                  navigate(`/burn-rabbit/${holeData.title}`);
-                }}
-              >
-                <FontAwesomeIcon icon={faFireAlt} />
-              </div>
-            </div>
+          ))}
+        </div>
+        <div className="sels">
+          <FontAwesomeIcon
+            icon={faArrowCircleLeft}
+            onClick={() => {
+              setIndex(index == 1 ? index : index - 1);
+            }}
+            className={`bottom left ${index == 1 ? "fill" : ``}`}
+          />
+          <div id="bottom" className="bottom">
+            <p>
+              {start}-{end} / {hole.digs.toString().padStart(3, "0")}
+            </p>
           </div>
-        </Wrapper>
-      </div>
+          <FontAwesomeIcon
+            icon={faArrowCircleRight}
+            onClick={() =>
+              setIndex((index - 1) * 10 + 10 >= hole.digs ? index : index + 1)
+            }
+            className={`bottom right ${
+              (index - 1) * 10 + 10 >= hole.digs ? "fill" : ``
+            }`}
+          />
+        </div>
+        <div className="sels2">
+          <FontAwesomeIcon
+            icon={faArrowCircleUp}
+            onClick={() => {
+              setIndex(1);
+              // setRabbit(thisChunkArray[0]);
+              setId(id <= 10 ? 1 : id - 10);
+              // setHole(holes[id <= 10 ? 1 : id - 10]);
+            }}
+            className={`bottom left ${id == 1 ? "fill" : ``}`}
+          />
+          <FontAwesomeIcon
+            icon={faChevronCircleUp}
+            onClick={() => {
+              setIndex(1);
+              // setRabbit(thisChunkArray[0]);
+              setId(id == 1 ? id : id - 1);
+              // setHole(holes[id == 1 ? id : id - 1]);
+            }}
+            className={`bottom left ${id == 1 ? "fill" : ``}`}
+          />
+          <div id="bottom" className="bottom">
+            <p>{id < 100 ? (id < 10 ? "00" + id : "0" + id) : id}</p>
+          </div>
+          <FontAwesomeIcon
+            icon={faChevronCircleDown}
+            onClick={() => {
+              // console.log("currnet id", id);
+              const newId = id + 1 > props.holes.length ? id : id + 1;
+              setId(newId);
+              setIndex(1);
+              props.setModals.setHole(props.holes[newId - 1]);
+            }}
+            className={`bottom right ${
+              id + 1 > props.holes.length ? "fill" : ``
+            }`}
+          />
+          <FontAwesomeIcon
+            icon={faArrowCircleDown}
+            onClick={() => {
+              const newId =
+                id + 10 > props.holes.length ? props.holes.length : id + 10;
+              setId(newId);
+              setIndex(1);
+              props.setModals.setHole(props.holes[newId - 1]);
+            }}
+            className={`bottom right ${
+              id + 1 > props.holes.length ? "fill" : ``
+            }`}
+          />
+        </div>
+        <div className="sels3">
+          <FontAwesomeIcon
+            icon={faFireFlameCurved}
+            onClick={() => {
+              props.setModals.setBurningModal(true);
+            }}
+            className={`bottom`}
+          />
+        </div>
+      </ArchivePageStyled>
     </>
   );
 }
 
-const Wrapper = styled.div`
-  border: none;
-  display: grid;
-  grid-template-columns: auto;
-  grid-template-rows: auto auto 1fr;
-  gap: 1rem;
-  height: 60%;
-  border: none;
-  user-select: none;
+export const ArchivePageStyled = styled.div`
+  display: flex;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  flex-direction: column;
+  align-items: left;
+  justify-content: center;
+  width: clamp(75px, 60vw, 600px);
+  margin: 0;
+  gap: ${(props) => (props.mobile ? "0" : "1rem")};
+  /* overflow: scroll; */
+  /* gap: ${(props) => (props.mobile ? "0rem" : "1rem")}; */
+  /* margin-right: auto; */
 
-  :focus {
-    outline: none;
-  }
-
-  .holes,
-  .rabbits {
-    display: flex;
-    flex-direction: column;
-    justify-content: space-between;
-    text-align: left;
-    h4 {
-      margin: 0.5rem;
-      font-size: clamp(9px, 3vw, 15px);
+  svg {
+    :hover {
+      scale: 1.1;
     }
-  }
-
-  .hole,
-  .rabbit {
-    padding: 0.5rem;
-  }
-
-  .rabbit {
-    min-height: 110px;
-    overflow-y: scroll;
   }
 
   .sels {
-    margin-top: auto;
+    /* position: fixed; */
     display: flex;
+    flex-direction: row;
+    align-items: center;
     justify-content: center;
+    gap: 1rem;
+    color: var(--forrestGreen);
+    margin-top: 1rem;
+
+    .left,
+    .right {
+      :hover {
+        color: var(--greyGreen);
+        cursor: pointer;
+      }
+    }
+
+    .fill {
+      color: rgba(0, 0, 0, 0);
+      :hover {
+        color: rgba(0, 0, 0, 0);
+        cursor: default;
+      }
+    }
   }
 
-  .sel {
-    border: none;
-    white-space: nowrap;
-    background-color: rgba(0, 0, 0, 0);
+  .sels2 {
+    position: absolute;
+    right: -3.5rem;
+    top: 50%;
+    transform: translateY(-50%);
+
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 1rem;
+    color: var(--forrestGreen);
+    /* writing-mode: vertical-lr; */
+    text-align: right;
+
+    .left,
+    .right {
+      :hover {
+        color: var(--greyGreen);
+        cursor: pointer;
+      }
+    }
+
+    .fill {
+      color: rgba(0, 0, 0, 0);
+      :hover {
+        color: rgba(0, 0, 0, 0);
+        cursor: default;
+      }
+    }
+  }
+
+  .sels3 {
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+    justify-content: center;
+    gap: 1rem;
+    color: var(--forrestGreen);
+    font-size: 1.5rem;
+    margin-top: ${(props) => (props.mobile ? "1rem" : "0rem")};
+
+    :hover {
+      color: var(--limeGreen);
+      cursor: pointer;
+    }
+
+    &.stats {
+      color: var(--forrestGreen);
+    }
+  }
+
+  /* .left {
+    :hover {
+      color: var(--limeGreen);
+    }
+  } */
+
+  .dark-box {
+    background-color: var(--forrestGreen);
     color: var(--lightGreen);
-    overflow: hidden;
-    padding: 0.5rem;
-    font-size: clamp(10px, 3vw, 20px);
+    font-size: clamp(12px, 3vw, 18px);
+
+    font-family: "Andale Mono", monospace;
+    .ital {
+      font-family: "Lato", sans-serif;
+    }
+    box-shadow: 0px 0px 5px 0px var(--forrestGreen);
+    width: 100%;
+    min-height: ${(props) => (props.mobile ? "271px" : "462px")};
+    border-radius: 1rem;
+    padding: 1rem 1rem;
+    /* gap: 0; */
+    /* overflow: scroll; */
+  }
+
+  .rabbits {
+    color: var(--limeGreen);
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: top;
+    gap: 1rem;
+    overflow: scroll;
+    /* overflow: auto; */
+    /* height: ${(props) => (props.mobile ? "250px" : "350px")}; */
+  }
+
+  .bar {
+    width: 100%;
+    margin: 1rem auto;
+    border-bottom: 1px dashed var(--greyGreen);
+  }
+
+  h1,
+  p {
+    padding: 0;
+    margin: 0;
+
+    text-align: left;
+  }
+
+  .hole-head {
+    display: flex;
+    width: 100%;
+    flex-direction: column;
+    justify-content: center;
+    align-items: left;
+    gap: 0;
+    /* text-align */
+    /* padding: 1rem; */
+    color: var(--forrestGreen);
+    h1 {
+      color: var(--lightGreen);
+      font-size: clamp(15px, 3vw, 40px);
+    }
+
+    h2 {
+      font-size: clamp(8px, 3vw, 15px);
+    }
+
+    p {
+      font-size: clamp(8px, 3vw, 15px);
+    }
+
+    svg {
+      font-size: clamp(8px, 3vw, 18px);
+      /* font-size: clamp(10px, 4vw, 25px); */
+
+      padding: 0 0.5rem;
+    }
+    padding: 1rem;
+    margin: ${(props) => (props.mobile ? "0.5rem" : "0.5rem")};
+    cursor: pointer;
+    backdrop-filter: blur(10px);
+    border-radius: 1rem;
+    /* padding: 1rem; */
+    box-shadow: 0px 0px 5px 0px var(--forrestGreen);
+
+    :hover {
+      /* cursor: pointer; */
+      /* backdrop-filter: blur(10px); */
+      /* border-radius: 1rem; */
+      /* padding: 1rem; */
+      /* box-shadow: 0px 0px 5px 0px var(--forrestGreen); */
+    }
+
+    .top {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      h1 {
+        color: var(--greyGreen);
+      }
+    }
+
+    .meta {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+  }
+
+  .uw {
+    display: flex;
+    width: 100%;
+    flex-direction: column;
+    justify-content: center;
+    align-items: left;
+    gap: 0;
+    color: var(--forrestGreen);
+    /* padding: 1rem; */
+    margin: ${(props) => (props.mobile ? "0.5rem" : "0.5rem")};
+    /* cursor: pointer; */
+    backdrop-filter: blur(10px);
+    border-radius: 1rem;
+    padding: 1rem;
+    box-shadow: 0px 0px 5px 0px var(--forrestGreen);
+
+    &.stats {
+      margin-bottom: 0.5rem;
+    }
+  }
+
+  .user-head {
+    display: flex;
+    width: 100%;
+    /* flex-direction: column; */
+    justify-content: space-between;
+    /* height: 100%; */
+    align-items: center;
+    gap: 1rem;
+    color: var(--forrestGreen);
+    margin: 0;
+
+    svg:hover {
+      cursor: pointer;
+      color: var(--greyGreen);
+    }
+
+    font-size: clamp(15px, 3vw, 30px);
+  }
+
+  .input-box {
+    color: var(--greyGreen);
+    background-color: rgba(0, 0, 0, 0);
+    border: none;
+    font-family: "Andale Mono", monospace;
+    font-size: clamp(15px, 3vw, 40px);
+    width: 100%;
+    height: 100%;
+
+    /* padding: 1rem; */
+    /* margin: 0.5rem 0; */
+    /* cursor: pointer; */
+    /* backdrop-filter: blur(10px); */
+    /* border-radius: 1rem; */
+    /* padding: 1rem; */
+    /* box-shadow: 0px 0px 5px 0px var(--forrestGreen); */
+
+    ::placeholder {
+      color: var(--greyGreen);
+    }
+  }
+
+  .stats {
+    display: flex;
+    justify-content: left;
+    align-items: center;
+    font-family: "Lato";
+    gap: 1rem;
+    gap: clamp(2px, 1vw, 10px);
+    /* height: 100%; */
+    text-align: left;
+    /* font-size: clamp(12px, 3vw, 18px); */
+    font-size: 1.25rem;
+    /* -left: auto; */
+
+    svg {
+      padding: 0 0.5rem;
+    }
 
     :hover {
       cursor: pointer;
-      color: var(--limeGreen);
     }
 
-    &#burn {
-      color: var(--limeGreen);
+    .w {
+      height: clamp(18px, 3vw, 32px);
+      display: grid;
+      align-items: center;
+    }
 
-      :hover {
-        cursor: pointer;
-        color: var(--lightGreen);
+    .active {
+      color: var(--greyGreen);
+      p {
+        color: var(--greyGreen);
+      }
+    }
+
+    img {
+      /* width: clamp(10px, 2vw, 30px);
+        height: clamp(10px, 2vw, 30px); */
+      height: 100%;
+      padding: 0;
+      margin: 0;
+      height: clamp(20px, 3vw, 32px);
+    }
+
+    &.sels3 {
+      /* right: -3rem; */
+      font-size: 1.5rem;
+      /* gap: 1rem; */
+      /* margin: 0 0.5rem; */
+      display: flex;
+      gap: 1.5rem;
+      /* color: var(--greyGreen); */
+
+      svg {
+        :hover {
+          color: var(--limeGreen);
+          scale: 1.1;
+        }
+
+        &.active {
+          color: var(--greyGreen);
+          :hover {
+            scale: 1;
+          }
+        }
+        /* padding: 0.5rem 0; */
       }
     }
   }
 
-  .jump-sel {
-    color: var(--limeGreen);
+  .r-stats {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    font-family: "Lato";
+    gap: 1rem;
+    gap: clamp(2px, 1vw, 10px);
+    width: 100%;
+    color: var(--lightGreen);
 
-    &.active {
-      color: var(--limeGreen);
-
-      :hover {
-        cursor: pointer;
-      }
+    .w {
+      height: clamp(18px, 3vw, 32px);
     }
 
-    &.inactive {
+    .ww {
+      display: flex;
+      /* justify-content: space-between; */
+      align-items: center;
+      justify-content: center;
+    }
+
+    img {
+      /* width: clamp(10px, 2vw, 30px);
+        height: clamp(10px, 2vw, 30px); */
+      height: 100%;
+      padding: 0;
+      margin: 0;
+      height: clamp(18px, 3vw, 32px);
+    }
+
+    p {
+      color: var(--limeGreen);
+    }
+
+    /* p:hover,
+    &:hover {
       color: var(--forrestGreen);
-    }
-
-    :hover {
-      cursor: default;
-    }
+    } */
   }
 
-  .hole-jump,
-  .rabbit-jump {
-    font-size: clamp(2px, 2vw, 16px);
-    border: none;
-  }
-  input[type="number"]::-webkit-inner-spin-button,
-  input[type="number"]::-webkit-outer-spin-button {
-    -webkit-appearance: none;
-    margin: 0;
-  }
+  .hole {
+    display: flex;
+    flex-direction: row;
+    justify-content: space-between;
+    align-items: center;
+    font-family: "Andale Mono", monospace;
+    gap: 1rem;
+    gap: clamp(2px, 1vw, 10px);
+    /* width: 100%; */
+    color: var(--lightGreen);
+    padding: 1rem;
 
-  input {
-    :focus {
-      outline: none;
+    /* flex-direction: column; */
+    /* align-items: left; */
+    /* justify-content: center; */
+    gap: 1rem;
+    padding: 1rem;
+    border-radius: 1rem;
+
+    border: 0.5px solid var(--forrestGreen);
+
+    &:hover {
+      cursor: pointer;
+      /* color: var(--forrestGreen); */
+      /* background-color: var(--greyGreen); */
+      border: 0.5px solid var(--lightGreen);
+      scale: 1.01;
+
+      p {
+        /* color: var(--forrestGreen); */
+      }
     }
-    ::placeholder {
+
+    .h-stats {
+      display: flex;
+      /* flex-direction: row; */
+      justify-content: left;
+      align-items: center;
+      font-family: "Lato";
+      gap: 1rem;
+      gap: clamp(2px, 1vw, 10px);
+      /* width: 100%; */
+      color: var(--limeGreen);
+      margin-left: auto;
+
+      .ww {
+        display: flex;
+        /* justify-content: space-between; */
+        align-items: center;
+      }
+
+      .w {
+        height: clamp(27px, 3vw, 32px);
+      }
+
+      img {
+        /* width: clamp(10px, 2vw, 30px);
+        height: clamp(10px, 2vw, 30px); */
+        height: 100%;
+        padding: 0;
+        margin: 0;
+      }
+
+      p {
+        color: var(--limeGreen);
+      }
+    }
+
+    .ww {
+      display: flex;
+      /* justify-content: space-between; */
+      align-items: center;
+    }
+
+    .w {
+      height: clamp(27px, 3vw, 32px);
+    }
+
+    img {
+      /* width: clamp(10px, 2vw, 30px);
+        height: clamp(10px, 2vw, 30px); */
+      height: 100%;
+      padding: 0;
+      margin: 0;
+
+      height: clamp(18px, 3vw, 32px);
+    }
+
+    p {
       color: var(--lightGreen);
     }
 
-    background-color: rgba(0, 0, 0, 0);
-    width: 100%;
-    color: var(--lightGreen);
-    text-align: right;
+    /* p:hover,
+    &:hover {
+      color: var(--forrestGreen);
+    } */
+  }
+  .bottom svg:hover {
+    color: var(--limeGreen);
   }
 
-  width: clamp(400px, 40vw, 500px);
-  @media only screen and (max-width: 760px) {
-    width: 55%;
+  .hidden {
+    color: rgba(0, 0, 0, 0);
+    cursor: default;
+  }
 
-    padding: 0.5rem;
+  .rw {
+    width: 100%;
+    text-align: left;
+  }
 
-    .sels {
-      margin-left: 0;
+  .rabbit {
+    display: flex;
+    flex-direction: column;
+    align-items: left;
+    justify-content: center;
+    gap: 1rem;
+    padding: 1rem;
+    border-radius: 1rem;
 
-      input {
-        font-size: 10px;
+    border: 0.5px solid var(--forrestGreen);
+
+    p {
+      color: var(--lightGreen);
+    }
+
+    .r-stats {
+      p {
+        color: var(--limeGreen);
+      }
+    }
+
+    &:hover {
+      cursor: pointer;
+      /* color: var(--forrestGreen); */
+      /* background-color: var(--greyGreen); */
+      border: 0.5px solid var(--lightGreen);
+      scale: 1.01;
+
+      p {
+        /* color: var(--forrestGreen); */
       }
     }
   }
-`;
-
-function inputStyle(isActive) {
-  return {
-    color: !isActive ? "var(--limeGreen)" : "var(--lightGreen)",
-    transition: "color 0.2s",
-  };
-}
-
-const HBar = styled.div`
-  width: 90%;
-  height: 1px;
-  background-color: var(--limeGreen);
-  margin: 0 auto;
 `;
