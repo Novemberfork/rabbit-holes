@@ -1,65 +1,26 @@
 import styled from "styled-components";
-import { Link, useLocation } from "react-router-dom";
-import { useState, useEffect } from "react";
+import { Link } from "react-router-dom";
 
 export default function Logo(props) {
-  const [toggled, setToggled] = useState(false);
-  const [hovered, setHovered] = useState(false);
-
-  /// mouse in/out listners
-  const handleMouseEnter = () => {
-    setHovered(true);
-  };
-  const handleMouseLeave = () => {
-    setHovered(false);
-  };
-
-  useEffect(() => {
-    let timer;
-    if (toggled) {
-      timer = setTimeout(() => {
-        setToggled(false);
-      }, 2900);
-    }
-    return () => clearTimeout(timer);
-  }, [toggled]);
-
   return (
     <>
-      <LogoStyle
-        darkMode={props.darkMode}
-        toggled={toggled}
-        onClick={() => {
-          if (toggled) props.setDarkMode(!props.darkMode);
-          setToggled(!toggled);
-        }}
-        onMouseLeave={() => {
-          setToggled(false);
-        }}
-      >
-        <Link
-          // to={location.pathname == "/" ? "/info" : "/"}
-          to={"/"}
-          className={props.mobile ? "mobile" : "non-mobile"}
-        >
-          <img
-            src={
-              props.darkMode
-                ? toggled
-                  ? "/logo-full-light.png"
-                  : "/logo-light.png"
-                : toggled
-                ? "/logo-full-dark.png"
-                : "/logo-dark.png"
-            }
-            alt="logo"
-            className="logo"
-          />
+      {/* <Wrapper> */}
+      <LogoStyle>
+        <Link to={"/"} className={props.mobile ? "mobile" : "non-mobile"}>
+          {props.mobile ? "RBITS" : "RabbitHoles"}
         </Link>
       </LogoStyle>
+      {/* </Wrapper> */}
     </>
   );
 }
+
+const Wrapper = styled.div`
+  :hover {
+    top: 1rem;
+    padding: 1rem;
+  }
+`;
 
 const LogoStyle = styled.div`
   position: absolute;
@@ -70,61 +31,87 @@ const LogoStyle = styled.div`
   -moz-backdrop-filter: blur(10px);
   -o-backdrop-filter: blur(10px);
   -ms-backdrop-filter: blur(10px);
-  border-radius: 0 0 50% 0;
-  /* border: 2px solid; */
-  /* border-color: rgba(0, 0, 0, 0); */
-  background-color: ${(props) =>
-    props.darkMode ? "var(--forrestGreen)" : "none"};
-
+  border-radius: 2rem;
+  border-top-right-radius: 0;
+  border-bottom-right-radius: 0;
+  border-top-left-radius: 0;
+  border: 2px solid;
+  border-color: none;
+  color: var(--forrestGreen);
+  top: -2px;
+  right: -2px;
   text-decoration: none;
   font-weight: bold;
   align-items: center;
   font-size: clamp(20px, 6vw, 40px);
   margin-left: auto;
-  padding: 0;
+  padding: 0.5rem 1rem;
   font-weight: 700;
   box-shadow: 0px 0px 5px 0px var(--forrestGreen);
-  justify-self: center;
-  aspect-ratio: 1/1;
-
-  width: clamp(90px, 8vw, 250px);
-  height: clamp(90px, 8vw, 250px);
-  img {
-    width: clamp(90px, 8vw, 250px);
-    height: clamp(90px, 8vw, 250px);
-  }
+  /* border-top: none;
+  border-right: none; */
 
   a {
     text-decoration: none;
-    color: ${(props) =>
-      props.darkMode ? "var(--greyGreen)" : "var(--forrestGreen)"};
+    color: var(--forrestGreen);
   }
-
-  top: -0;
-  left: -0;
-
-  top: ${(props) => (props.toggled ? "1rem" : "0")};
-  left: ${(props) => (props.toggled ? "1rem" : "0")};
-  border-radius: ${(props) => (props.toggled ? "50%" : "0 0 50% 0")};
-
-  /* border: ${(props) =>
-    props.toggled
-      ? props.darkMode
-        ? "1px solid var(--greyGreen)"
-        : "1px solid var(--forrestGreen)"
-      : "2px solid rgba(0, 0, 0, 0)"}; */
-
-  // Add transition property for smooth hover effect
-  transition: all 0.05s 0s ease-in-out;
 
   :hover {
-    scale: 1.05;
+    /* border-top: 2px solid;
+    border-right: 2px solid; */
+
+    border-radius: 2rem;
+
+    top: 1rem;
+    right: 1rem;
   }
 
-  ${(props) =>
-    props.toggled &&
-    `
-    animation: infinite rotate360 3s ease-in-out;
-    animation-delay: 0.2s;
-  `}
+  // Add transition property for smooth hover effect
+  transition: all 0.2s 0.05s ease-in-out;
 `;
+
+// const LogoStyle = styled.div`
+//   position: absolute;
+//   z-index: 1000;
+//   overflow: hidden;
+//   backdrop-filter: blur(10px);
+//   -webkit-backdrop-filter: blur(10px);
+//   -moz-backdrop-filter: blur(10px);
+//   -o-backdrop-filter: blur(10px);
+//   -ms-backdrop-filter: blur(10px);
+//   border-radius: 2rem;
+//   border-top-right-radius: 0;
+//   border-bottom-right-radius: 0;
+//   border-top-left-radius: 0;
+//   border: 2px solid;
+//   border-color: none;
+//   color: var(--forrestGreen);
+//   top: 0;
+//   right: 0;
+//   text-decoration: none;
+//   font-weight: bold;
+//   align-items: center;
+//   font-size: clamp(20px, 6vw, 40px);
+//   margin-left: auto;
+//   padding: 0.5rem 1rem;
+//   font-weight: 700;
+//   box-shadow: 0px 0px 5px 0px var(--forrestGreen);
+//   border-top: none;
+//   border-right: none;
+
+//   a {
+//     text-decoration: none;
+//     color: var(--forrestGreen);
+//   }
+
+//   :hover {
+//     border-bottom-left-radius: 2rem;
+//     border-top-left-radius: 2rem;
+//     border-bottom-right-radius: 2rem;
+//     border-top-right-radius: 2rem;
+//     margin-top: 1rem;
+//     margin-right: 1rem;
+//     border-top: 2px solid;
+//     border-right: 2px solid;
+//   }
+// `;

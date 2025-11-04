@@ -1,213 +1,305 @@
 import React, { useState } from "react";
 import styled from "styled-components";
-import fetchUserStatistics from "../components/hooks/fetchUserStatistics";
-import { useAccount } from "@starknet-react/core";
-import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
-import {
-  faArrowCircleLeft,
-  faArrowCircleRight,
-  faDigging,
-  faFireFlameCurved,
-  faSearch,
-  faUser,
-  faUserCircle,
-} from "@fortawesome/free-solid-svg-icons";
-import { ArchivePageStyled, Rabbit } from "./ArchivePage";
-
-function Hole({ hole, setUseJump, setModals }) {
-  return (
-    <div
-      className="hole spinnerY"
-      onClick={() => {
-        setUseJump(true);
-        setModals.setHole(hole);
-        setModals.setHoleModal(true);
-      }}
-    >
-      <p className="ital">{hole.title}</p>
-      <div className="h-stats">
-        <p>{hole.rabbits.length}</p>
-        <FontAwesomeIcon icon={faFireFlameCurved} />
-        <p>{hole.depth}</p>
-        <div className="w">
-          <img src={"/logo-full-lime.png"} alt="logo" className={`logo`} />
-        </div>
-      </div>
-    </div>
-  );
-}
+import { useNavigate, useParams } from "react-router-dom";
+import UserSearchBar from "../components/UserSearchBar";
+import fetchUserData from "../components/hooks/fetchUserData";
 
 export default function UserPage(props) {
-  const [index, setIndex] = useState(1);
+  const { key } = useParams();
 
-  const { isHoles, setIsHoles, opt, setOpt } = props;
-  const { address } = useAccount();
-  const addr = address ? address : "0x1234...5678";
-  const user = `${addr.slice(0, 6)}...${addr.slice(-4)}`;
+  const [isHoles, setIsHoles] = useState(true);
 
-  const userArchive = props.userArchive; // fetchUserStatistics(addr) if user is not the one connected (searching)
+  const user = key ? key : "0x1234...abcd";
 
-  const chunkSize = 10;
-  const thisArchive =
-    opt == "rabbits" ? userArchive.rabbits : userArchive.holes;
-  const thisChunkArray = thisArchive.slice(
-    (index - 1) * chunkSize,
-    index * chunkSize
-  );
-
-  let start = ((index - 1) * 10 + 1).toString().padStart(3, "0");
-  let end = Math.min(
-    parseInt(start) + 9,
-    opt == "rabbit" ? userArchive.totalRabbits : userArchive.totalHoles
-  )
-    .toString()
-    .padStart(3, "0");
-
-  /// when connected to contract
-  /// add check for userSearch == address,
-  /// if false, use userArchive, else replace userArchive with fetchUserArchive(userSearch)
-
-  const opts = ["depth", "holes", "rabbits"];
+  const navigate = useNavigate();
+  const userData = fetchUserData(user);
 
   return (
     <>
-      <ArchivePageStyled
-        className="container"
-        isHoles={isHoles}
-        opt={opt}
-        mobile={props.mobile}
-      >
-        <div className="uw">
-          <div className="user-head">
-            <input placeholder={user} className="input-box"></input>
-            <FontAwesomeIcon icon={faSearch} />
+      <div className="container">
+        <Wrapper isHoles={isHoles}>
+          <UserSearchBar user={user} />
+          {/* DEMO USER H OR R */}
+          {isHoles && !key && (
+            <div className="user-holes-section">
+              <div className="clear-box-dark-border user-holes" id="clear-box">
+                {userData.holes.map((hole, index) => (
+                  <React.Fragment key={"hole" + index}>
+                    <div
+                      className="hole-link"
+                      onClick={() => {
+                        navigate(`/archive/${hole.id}`);
+                      }}
+                    >
+                      <h4>
+                        &gt; Hole #{hole.id} <em>"{hole.title}"</em>
+                      </h4>
+                      <h4>
+                        &gt; Depth: <em>{hole.depth}</em>
+                      </h4>
+                    </div>
+                    <Bar />
+                  </React.Fragment>
+                ))}
+              </div>
+            </div>
+          )}
+          {!isHoles && !key && (
+            <div className="user-holes-section">
+              <div className="clear-box-dark-border user-holes" id="clear-box">
+                {userData.rabbits.map((rabbit, index) => (
+                  <React.Fragment key={"rabbit" + index}>
+                    <div
+                      className="hole-link"
+                      onClick={() => {
+                        navigate(`/archive/${rabbit.hole_id}/${rabbit.id}`);
+                      }}
+                    >
+                      <h4>
+                        &gt; Rabbit <em>#{rabbit.global_id}</em>
+                      </h4>
+                      <h4>
+                        &gt; Hole :<em>"{rabbit.title}"</em>
+                      </h4>
+                      <h4>
+                        &gt; Msg: <em>{rabbit.msg}</em>
+                      </h4>
+                    </div>
+                    <Bar />
+                  </React.Fragment>
+                ))}
+              </div>
+            </div>
+          )}
+          {/* NO USER */}
+          {key && (
+            <div className="user-holes-section">
+              <div className="clear-box-dark-border user-holes">
+                <div
+                  className="hole-link"
+                  onClick={() => {
+                    navigate(`/archive/1`);
+                  }}
+                >
+                  &gt;
+                </div>
+                <Bar />
+                <div
+                  className="hole-link"
+                  onClick={() => {
+                    navigate(`/archive/1`);
+                  }}
+                >
+                  &gt;
+                </div>
+              </div>
+            </div>
+          )}
+          <div className="wrapper3">
+            <h1
+              onClick={() => {
+                setIsHoles(true);
+              }}
+              className={`a sel ${isHoles ? "active" : ""}`}
+            >
+              Holes
+            </h1>
+            <VBar />
+            <h1
+              onClick={() => {
+                setIsHoles(false);
+              }}
+              className={`b sel ${isHoles ? "" : "active"}`}
+            >
+              Rabbits
+            </h1>
           </div>
-        </div>
+          <div className="wrapper2">
+            <div
+              className="dark-button-small stat"
+              onClick={() => {
+                setIsHoles(true);
+              }}
+            >
+              <h4>
+                Digs: <em>{key ? 0 : userData.holes.length}</em>
+              </h4>
+            </div>
 
-        {/* <div className="stats">
-          <FontAwesomeIcon
-            icon={faUser}
-            className={`${props.opt == "depth" ? "active" : ""}`}
-            onClick={() => {
-              setOpt("depth");
-            }}
-          />
-          <FontAwesomeIcon
-            icon={faDigging}
-            className={`${props.opt == "holes" ? "active" : ""}`}
-            onClick={() => {
-              setOpt("holes");
-            }}
-          />
-          <FontAwesomeIcon
-            icon={faFireFlameCurved}
-            className={`${props.opt == "rabbits" ? "active" : ""}`}
-            onClick={() => {
-              setOpt("rabbits");
-            }}
-          />
-        </div> */}
-        {opt == "rabbits" && (
-          <div className="dark-box rabbits">
-            {thisChunkArray.map((rabbit, index) => (
-              <div key={index} className="rw">
-                <Rabbit
-                  rabbit={rabbit}
-                  hole={props.userArchive.holes[rabbit.holeId - 1]}
-                  isGlobalRabbit={false}
-                  {...props}
-                />
-                <div className="bar"></div>
-              </div>
-            ))}
+            <div
+              className="dark-button-small stat"
+              onClick={() => {
+                setIsHoles(false);
+              }}
+            >
+              <h4>
+                Burns: <em>{key ? 0 : userData.rabbits.length}</em>
+              </h4>
+            </div>
+            <div
+              className="dark-button-small stat tt"
+              onClick={() => {
+                navigate(`/info/`);
+              }}
+            >
+              <h4>
+                Balance:{" "}
+                <em>
+                  {key
+                    ? 0
+                    : parseInt(userData.holes.length) * 25 -
+                      parseInt(userData.rabbits.length)}{" "}
+                  RBIT
+                </em>
+              </h4>
+            </div>
           </div>
-        )}
-        {opt == "holes" && (
-          <div className="dark-box rabbits">
-            {thisChunkArray.map((hole, index) => (
-              <div key={index} className="rw">
-                <Hole hole={hole} {...props} />
-                <div className="bar"></div>
-              </div>
-            ))}
-          </div>
-        )}
-        {opt == "depth" && <div className="dark-box depth"></div>}
-        <div className="sels">
-          {/* {opt != "depth" && ( */}
-          {/* <> */}
-          <FontAwesomeIcon
-            icon={faArrowCircleLeft}
-            onClick={() => {
-              setIndex(index == 1 ? index : index - 1);
-            }}
-            className={`bottom left ${index == 1 ? "fill" : ``}`}
-            style={opt == "depth" ? { color: "rgba(0,0,0,0)" } : {}}
-          />
-          <div id="bottom" className="bottom">
-            <p style={opt == "depth" ? { color: "rgba(0,0,0,0)" } : {}}>
-              {start}-{end} /{" "}
-              {opt == "holes"
-                ? userArchive.totalHoles.toString().padStart(3, "0")
-                : userArchive.totalRabbits.toString().padStart(3, "0")}
-            </p>
-          </div>
-          <FontAwesomeIcon
-            icon={faArrowCircleRight}
-            onClick={() => {
-              setIndex(
-                (index - 1) * 10 + 10 >=
-                  (opt == "holes"
-                    ? userArchive.totalHoles
-                    : userArchive.totalRabbits)
-                  ? index
-                  : index + 1
-              );
-            }}
-            className={`bottom right ${
-              (index - 1) * 10 + 10 >=
-              (opt == "holes"
-                ? userArchive.totalHoles
-                : userArchive.totalRabbits)
-                ? "fill"
-                : ``
-            }`}
-            style={opt == "depth" ? { color: "rgba(0,0,0,0)" } : {}}
-          />
-        </div>
-        <div className="stats sels3">
-          <FontAwesomeIcon
-            icon={faUser}
-            className={`${props.opt == "depth" ? "active" : ""} bottom left`}
-            onClick={() => {
-              setOpt("depth");
-              setIndex(1);
-            }}
-          />
-          <FontAwesomeIcon
-            icon={faDigging}
-            className={`${props.opt == "holes" ? "active" : ""}`}
-            onClick={() => {
-              setOpt("holes");
-              setIndex(1);
-            }}
-          />
-          <FontAwesomeIcon
-            icon={faFireFlameCurved}
-            className={`${props.opt == "rabbits" ? "active" : ""}`}
-            onClick={() => {
-              setOpt("rabbits");
-              setIndex(1);
-            }}
-          />
-        </div>
-        {/* <div className="sels3">
-          <FontAwesomeIcon
-            icon={faFireFlameCurved}
-            className={`bottom hidden`}
-          />
-        </div> */}
-      </ArchivePageStyled>
+        </Wrapper>
+      </div>
     </>
   );
 }
+
+const Bar = styled.div`
+  width: 100%;
+  margin: 1rem auto;
+  border-bottom: 1px solid var(--forrestGreen);
+`;
+
+const Wrapper = styled.div`
+  display: grid;
+  grid-template-columns: auto;
+  gap: 1rem;
+  color: var(--forrestGreen);
+  place-items: center;
+  place-content: center;
+  user-select: none;
+  width: clamp(200px, 60%, 400px);
+
+  .wrapper2 {
+    display: grid;
+    grid-template-columns: auto auto auto;
+    gap: 1rem;
+
+    &:hover {
+      cursor: default;
+    }
+  }
+
+  .sel {
+    color: var(--forrestGreen);
+
+    h1 {
+      margin: 0;
+    }
+  }
+
+  .active {
+    color: var(--lightGreen);
+  }
+
+  .activeR {
+    color: var(--limeGreen);
+  }
+
+  .activeH {
+    color: var(--lightGreen);
+  }
+
+  .wrapper3 {
+    display: grid;
+    grid-template-columns: auto auto auto;
+    gap: 0.5rem;
+    font-size: clamp(9px, 3vw, 14px);
+    height: fit-content;
+
+    .a {
+      margin-left: auto;
+    }
+    .b {
+      margin-right: auto;
+    }
+
+    h1:hover {
+      cursor: pointer;
+    }
+
+    h1 {
+      margin: 0.5rem;
+    }
+  }
+
+  @media only screen and (max-width: 760px) {
+    .wrapper2 {
+      grid-template-columns: auto auto;
+    }
+
+    .tt {
+      margin: 0 auto;
+      grid-column: 1/-1;
+    }
+  }
+
+  h4 {
+    margin: 0;
+    /* padding: 0; */
+    padding-bottom: 0.5rem;
+  }
+
+  .stat {
+    padding: 0.75rem;
+    font-size: clamp(9px, 3vw, 14px);
+    border: none;
+    box-shadow: 0px 0px 5px 0px var(--forrestGreen);
+    color: var(--lightGreen);
+
+    h4 {
+      padding: 0;
+    }
+  }
+
+  h2 {
+    color: var(--limeGreen);
+  }
+
+  .hole-link {
+    padding: 1rem;
+    &:hover {
+      cursor: pointer;
+      color: var(--lightGreen);
+      background-color: var(--forrestGreen);
+
+      border-radius: 1rem;
+      em {
+        color: var(--limeGreen);
+      }
+    }
+  }
+
+  #clear-box {
+    width: clamp(200px, 40vw, 600px);
+  }
+
+  .user-holes {
+    max-height: 200px;
+    overflow-y: scroll;
+    display: grid;
+    grid-template-columns: auto;
+    gap: 0rem;
+    margin: 0 auto;
+    width: fit-content;
+    margin-top: 1rem;
+
+    color: var(--forrestGreen);
+    em {
+      color: var(--lightGreen);
+    }
+  }
+`;
+
+const VBar = styled.div`
+  width: 0;
+  height: 50%;
+  margin: auto auto;
+  border-left: 2px solid var(--forrestGreen);
+`;

@@ -19,5 +19,5 @@ export function stringToFelts(str) {
     felts.push(num.toString());
   }
 
-  return felts;
+  return felts.length === 1 ? felts[0] : felts;
 }

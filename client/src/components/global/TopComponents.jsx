@@ -6,32 +6,21 @@ import { useState } from "react";
 
 export default function TopComponents(props) {
   const [walletShowing, setWalletShowing] = useState(false);
-  // const [darkMode, setDarkMode] = useState(false);
 
   return (
     <div style={{ overflow: "hidden" }}>
       <LoginButton
         mobile={props.mobile}
         walletShowing={walletShowing}
-        setAccountModal={props.setAccountModal}
-        darkMode={props.darkMode}
-        accountModal={props.accountModal}
+        setWalletShowing={setWalletShowing}
       />
-      <Navbar style={{ zIndex: 1000 }} mobile={props.mobile} />
+      <Navbar totalDigs={props.totalDigs} style={{ zIndex: 1000 }} />
       <Logo
         mobile={props.mobile}
         walletShowing={walletShowing}
-        // setWalletShowing={setWalletShowing}
-        darkMode={props.darkMode}
-        setDarkMode={props.setDarkMode}
+        setWalletShowing={setWalletShowing}
       />
-      <Footer
-        mobile={props.mobile}
-        walletShowing={walletShowing}
-        // setWalletShowing={setWalletShowing}
-        darkMode={props.darkMode}
-        setDarkMode={props.setDarkMode}
-      />
+      <Footer />
     </div>
   );
 }

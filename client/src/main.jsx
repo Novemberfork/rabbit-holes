@@ -10,7 +10,7 @@ const connectors = [
 
 ReactDOM.createRoot(document.getElementById("root")).render(
   // <React.StrictMode>
-  <StarknetConfig autoConnect={true} connectors={connectors}>
+  <StarknetConfig autoConnect connectors={connectors}>
     <App />
   </StarknetConfig>
   // </React.StrictMode>
